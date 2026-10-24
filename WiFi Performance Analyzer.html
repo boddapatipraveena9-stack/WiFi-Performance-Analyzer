@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WiFi Performance Analyzer</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f5f8fc;--card:#fff;--tx:#14213d;--mut:#5b6b85;--ac:#1d6fe8;--bd:#dde5f0;--ok:#16a34a;--wn:#d97706;--bad:#dc2626}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1526;--card:#16213a;--tx:#e8eefb;--mut:#9aabc9;--ac:#5b9bff;--bd:#27375a}}
+:root[data-theme="dark"]{--bg:#0d1526;--card:#16213a;--tx:#e8eefb;--mut:#9aabc9;--ac:#5b9bff;--bd:#27375a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
+header{background:linear-gradient(135deg,#1d6fe8,#0b3a8a);color:#fff;padding:40px 20px;text-align:center}
+header h1{margin:0 0 8px;font-size:clamp(1.6rem,5vw,2.4rem)}
+header p{margin:0 auto;max-width:640px;opacity:.9}
+nav{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:10px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+nav a{color:var(--ac);text-decoration:none;padding:4px 10px;border-radius:14px;font-size:.9rem}
+nav a:hover{background:var(--bg)}
+main{max-width:900px;margin:0 auto;padding:16px}
+section{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:20px;margin:16px 0}
+h2{margin-top:0;color:var(--ac)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.box{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:12px;text-align:center}
+.box b{display:block;font-size:1.4rem}
+.box span{color:var(--mut);font-size:.8rem}
+label{display:block;margin:10px 0 2px;font-size:.9rem;color:var(--mut)}
+input[type=range],select{width:100%}
+select,button{padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+button{background:var(--ac);color:#fff;border:0;cursor:pointer;padding:10px 18px;margin-top:10px}
+.bar{height:14px;border-radius:7px;background:var(--bd);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;width:0;transition:width .3s,background .3s}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:480px}
+th,td{border:1px solid var(--bd);padding:8px;text-align:left;font-size:.9rem}
+th{background:var(--bg)}
+code{background:var(--bg);padding:2px 6px;border-radius:4px}
+footer{text-align:center;color:var(--mut);padding:20px;font-size:.85rem}
+</style></head><body>
+<header><h1>📶 WiFi Performance Analyzer</h1>
+<p>Computer Networks PBL project: understand, measure and estimate the key factors that decide how well a wireless LAN (IEEE 802.11) performs.</p></header>
+<nav><a href="#about">About</a><a href="#metrics">Metrics</a><a href="#live">Live Test</a><a href="#signal">Signal Estimator</a><a href="#channels">Channels</a><a href="#std">Standards</a><a href="#tips">Tips</a></nav>
+<main>
+
+<section id="about"><h2>1. About the Project</h2>
+<p>WiFi performance depends on signal strength, interference, channel width, congestion and the 802.11 standard in use. This project explains these parameters and gives simple tools to analyze them.</p>
+<p><b>Objectives:</b> study WLAN performance metrics, measure latency and jitter, estimate signal loss from distance and obstacles, and recommend ways to improve a network.</p></section>
+
+<section id="metrics"><h2>2. Key Performance Metrics</h2>
+<div class="tw"><table><tr><th>Metric</th><th>Meaning</th><th>Good value</th></tr>
+<tr><td>RSSI</td><td>Received signal strength (dBm)</td><td>&gt; -60 dBm</td></tr>
+<tr><td>SNR</td><td>Signal minus noise floor (dB)</td><td>&gt; 25 dB</td></tr>
+<tr><td>Throughput</td><td>Actual data rate achieved</td><td>Depends on plan/standard</td></tr>
+<tr><td>Latency (RTT)</td><td>Round-trip time of a packet</td><td>&lt; 30 ms</td></tr>
+<tr><td>Jitter</td><td>Variation in latency</td><td>&lt; 10 ms</td></tr>
+<tr><td>Packet loss</td><td>% of packets not delivered</td><td>0 – 1 %</td></tr></table></div></section>
+
+<section id="live"><h2>3. Live Connection Test</h2>
+<p>Reads your browser's network info and measures latency and jitter by sending repeated small requests.</p>
+<div class="grid">
+<div class="box"><b id="ctype">–</b><span>Effective type</span></div>
+<div class="box"><b id="cdown">–</b><span>Downlink (Mbps est.)</span></div>
+<div class="box"><b id="crtt">–</b><span>RTT (ms est.)</span></div>
+<div class="box"><b id="cstat">–</b><span>Status</span></div></div>
+<button id="run">Run Latency Test</button>
+<div class="grid" style="margin-top:12px">
+<div class="box"><b id="avg">–</b><span>Avg latency (ms)</span></div>
+<div class="box"><b id="jit">–</b><span>Jitter (ms)</span></div>
+<div class="box"><b id="loss">–</b><span>Packet loss (%)</span></div>
+<div class="box"><b id="grade">–</b><span>Grade</span></div></div></section>
+
+<section id="signal"><h2>4. Signal Strength Estimator</h2>
+<p>Uses the Free-Space Path Loss formula: <code>FSPL = 20·log₁₀(d) + 20·log₁₀(f) − 27.55</code> (d in m, f in MHz).</p>
+<label>Band</label><select id="band"><option value="2437">2.4 GHz</option><option value="5180">5 GHz</option></select>
+<label>Distance: <b id="dv">10</b> m</label><input id="dist" type="range" min="1" max="100" value="10">
+<label>Walls in between: <b id="wv">1</b> (≈ 5 dB each)</label><input id="walls" type="range" min="0" max="8" value="1">
+<label>Router TX power: <b id="pv">20</b> dBm</label><input id="pwr" type="range" min="10" max="30" value="20">
+<div class="grid" style="margin-top:12px">
+<div class="box"><b id="loss2">–</b><span>Path loss (dB)</span></div>
+<div class="box"><b id="rssi">–</b><span>Est. RSSI (dBm)</span></div>
+<div class="box"><b id="snr">–</b><span>Est. SNR (dB), noise −95</span></div>
+<div class="box"><b id="qual">–</b><span>Quality</span></div></div>
+<div class="bar"><i id="qbar"></i></div></section>
+
+<section id="channels"><h2>5. Channel Overlap (2.4 GHz)</h2>
+<p>Only channels 1, 6 and 11 do not overlap. Pick a channel and see which neighbours it interferes with (channels are 5 MHz apart, each about 22 MHz wide).</p>
+<label>Your channel</label><select id="ch"></select>
+<div id="chres" style="margin-top:10px"></div></section>
+
+<section id="std"><h2>6. WiFi Standards</h2>
+<div class="tw"><table><tr><th>Standard</th><th>WiFi name</th><th>Band</th><th>Max rate (theory)</th></tr>
+<tr><td>802.11b</td><td>WiFi 1</td><td>2.4 GHz</td><td>11 Mbps</td></tr>
+<tr><td>802.11a / g</td><td>WiFi 2/3</td><td>5 / 2.4 GHz</td><td>54 Mbps</td></tr>
+<tr><td>802.11n</td><td>WiFi 4</td><td>2.4 / 5 GHz</td><td>600 Mbps</td></tr>
+<tr><td>802.11ac</td><td>WiFi 5</td><td>5 GHz</td><td>6.9 Gbps</td></tr>
+<tr><td>802.11ax</td><td>WiFi 6/6E</td><td>2.4 / 5 / 6 GHz</td><td>9.6 Gbps</td></tr></table></div>
+<p>Real-world throughput is usually 40–60 % of the theoretical rate because of protocol overhead (CSMA/CA, ACKs) and shared airtime.</p></section>
+
+<section id="tips"><h2>7. How to Improve WiFi Performance</h2>
+<ul><li>Place the router centrally and high, away from walls and metal.</li>
+<li>Use 5 GHz for speed and short range, 2.4 GHz for coverage.</li>
+<li>Choose a non-overlapping channel (1, 6 or 11 on 2.4 GHz).</li>
+<li>Keep firmware updated and use WPA3/WPA2 security.</li>
+<li>Reduce interference from microwaves, Bluetooth and cordless phones.</li>
+<li>Add mesh nodes or access points for large areas.</li></ul></section>
+</main>
+<footer>Computer Networks PBL · WiFi Performance Analyzer</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+// Live info
+function info(){const c=navigator.connection||{};$('ctype').textContent=c.effectiveType||'n/a';$('cdown').textContent=c.downlink??'n/a';$('crtt').textContent=c.rtt??'n/a';$('cstat').textContent=navigator.onLine?'Online':'Offline'}
+info();addEventListener('online',info);addEventListener('offline',info);
+// Latency test (same-origin requests)
+$('run').onclick=async()=>{
+  const b=$('run');b.disabled=true;b.textContent='Testing...';
+  const t=[];let lost=0;
+  for(let i=0;i<10;i++){
+    const s=performance.now();
+    try{const r=await fetch(location.href.split('#')[0]+'?t='+Date.now()+i,{cache:'no-store',method:'HEAD'});if(!r.ok)throw 0;t.push(performance.now()-s)}catch(e){lost++}
+  }
+  const avg=t.length?t.reduce((a,x)=>a+x,0)/t.length:0;
+  let j=0;for(let i=1;i<t.length;i++)j+=Math.abs(t[i]-t[i-1]);j=t.length>1?j/(t.length-1):0;
+  $('avg').textContent=t.length?avg.toFixed(1):'–';$('jit').textContent=t.length?j.toFixed(1):'–';
+  $('loss').textContent=(lost*10);
+  const g=!t.length?'Fail':(avg<50&&j<10&&lost==0)?'Excellent':(avg<120&&j<30&&lost<2)?'Good':'Poor';
+  $('grade').textContent=g;b.disabled=false;b.textContent='Run Latency Test';
+};
+// Signal estimator
+function calc(){
+  const f=+$('band').value,d=+$('dist').value,w=+$('walls').value,p=+$('pwr').value;
+  $('dv').textContent=d;$('wv').textContent=w;$('pv').textContent=p;
+  const l=20*Math.log10(d)+20*Math.log10(f)-27.55+w*5;
+  const r=p-l,s=r+95;
+  $('loss2').textContent=l.toFixed(1);$('rssi').textContent=r.toFixed(1);$('snr').textContent=s.toFixed(1);
+  let q,c;if(r>-55){q='Excellent';c='var(--ok)'}else if(r>-67){q='Good';c='var(--ok)'}else if(r>-75){q='Fair';c='var(--wn)'}else{q='Poor';c='var(--bad)'}
+  $('qual').textContent=q;
+  const pct=Math.max(5,Math.min(100,(r+90)*100/40));
+  $('qbar').style.width=pct+'%';$('qbar').style.background=c;
+}
+['band','dist','walls','pwr'].forEach(i=>$(i).oninput=calc);calc();
+// Channels
+for(let i=1;i<=11;i++){const o=document.createElement('option');o.value=i;o.textContent='Channel '+i;if(i==6)o.selected=true;$('ch').appendChild(o)}
+function chan(){
+  const c=+$('ch').value;const ov=[];
+  for(let i=1;i<=11;i++)if(i!==c&&Math.abs(i-c)<5)ov.push(i);
+  const clean=[1,6,11].includes(c);
+  $('chres').innerHTML='<p><b>Overlaps with channels:</b> '+(ov.join(', ')||'none')+'</p><p style="color:var(--'+(clean?'ok':'wn')+')">'+(clean?'✔ Non-overlapping channel, recommended.':'⚠ Overlapping channel, prefer 1, 6 or 11 to reduce interference.')+'</p>';
+}
+$('ch').onchange=chan;chan();
+</script></body></html>
